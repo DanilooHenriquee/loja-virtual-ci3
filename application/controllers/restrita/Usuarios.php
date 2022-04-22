@@ -31,24 +31,109 @@ class Usuarios extends CI_Controller {
     }
 
     public function core($usuario_id = NULL) {
+
+        $usuario_id = (int)$usuario_id;
+
         if (!$usuario_id) {
             //cadastrar usuario
-            echo "Cadastrar Usuario";
+
+            $this->form_validation->set_rules('first_name', 'Nome', 'trim|required|min_length[4]|max_length[50]');
+            $this->form_validation->set_rules('last_name', 'Sobrenome', 'trim|required|min_length[4]|max_length[50]');
+            $this->form_validation->set_rules('email', 'E-mail', 'trim|required|min_length[4]|max_length[100]|valid_email|callback_valida_email');
+            $this->form_validation->set_rules('username', 'Usuario', 'trim|required|min_length[4]|max_length[100]|callback_valida_usuario');
+            $this->form_validation->set_rules('password', 'Senha', 'trim|required|min_length[4]|max_length[200]');
+            $this->form_validation->set_rules('confirma', 'Confirma Senha', 'trim|required|matches[password]');
+
+            if ($this->form_validation->run()) {
+                // echo "<pre>";
+                // print_r($this->input->post());
+                // exit();
+
+                $username = $this->input->post('username');
+                $password = $this->input->post('password');
+                $email = $this->input->post('email');
+                $additional_data = [
+                            'first_name' => $this->input->post('first_name'),
+                            'last_name' => $this->input->post('last_name'),
+                ];
+                $group = [$this->input->post('perfil')]; // Sets user to admin.
+            
+                $this->ion_auth->register($username, $password, $email, $additional_data, $group);
+
+            } else {
+                //Erro de validação.
+
+                $data = [
+                    'titulo'  => 'Cadastrar usuário',
+                    'grupos'  => $this->ion_auth->groups()->result(),
+                ];
+
+                $this->load->view('restrita/template/header', $data);
+                $this->load->view('restrita/usuarios/core');
+                $this->load->view('restrita/template/footer');
+
+            }
+
+
         } else {
             if (!$usuario = $this->ion_auth->user($usuario_id)->row()) {
-                $this->session->set_flashdata('erro','O usuário não foi encontrado');
+                $this->session->set_flashdata('erro', 'O usuário não foi encontrado');
                 redirect('restrita/usuarios');
             } else {
-
                 //Editar usuário:
-                $this->form_validation->set_rules('first_name','Nome','trim|required');
 
-                if($this->form_validation->run()) {
-                    
-                    echo "<pre>";
-                    print_r($this->input->post());
-                    exit();
+                $this->form_validation->set_rules('first_name', 'Nome', 'trim|required|min_length[4]|max_length[50]');
+                $this->form_validation->set_rules('last_name', 'Sobrenome', 'trim|required|min_length[4]|max_length[50]');
+                $this->form_validation->set_rules('email', 'E-mail', 'trim|required|min_length[4]|max_length[100]|valid_email|callback_valida_email');
+                $this->form_validation->set_rules('username', 'Usuario', 'trim|required|min_length[4]|max_length[100]|callback_valida_usuario');
+                $this->form_validation->set_rules('password', 'Senha', 'trim|min_length[4]|max_length[200]');
+                $this->form_validation->set_rules('confirma', 'Confirma Senha', 'trim|matches[password]');
 
+                if ($this->form_validation->run()) {
+
+                    $data = elements(
+                        [
+                            'first_name',
+                            'last_name',
+                            'email',
+                            'username',
+                            'password',
+                            'active',
+                        ],
+                        $this->input->post()
+                    );
+
+                    $password = $this->input->post('password');
+
+
+                    /*
+                    * Não atualiza a senha se a mesma não for passada.
+                    */
+
+                    if (!$password) {
+                        unset($data['password']);
+                    }
+
+                    /*
+                    * Sanetizando o array $data, remover html dos inputs.
+                    */
+                    $data = html_escape($data);
+
+                    if ($this->ion_auth->update($usuario_id, $data)) {
+
+                        $perfil = (int)$this->input->post('perfil');
+
+                        if ($perfil) {
+                            $this->ion_auth->remove_from_group(NULL, $usuario_id);
+                            $this->ion_auth->add_to_group($perfil, $usuario_id);
+                        }
+
+                        $this->session->set_flashdata('sucesso', 'Dados salvos com sucesso!');
+                    } else {
+                        $this->session->set_flashdata('erro', $this->ion_auth->errors());
+                    }
+
+                    redirect('restrita/usuarios');
                 } else {
                     // Erro de Validação.
 
@@ -58,14 +143,60 @@ class Usuarios extends CI_Controller {
                         'perfil'  => $this->ion_auth->get_users_groups($usuario_id)->row(),
                         'grupos'  => $this->ion_auth->groups()->result(),
                     ];
-    
+
                     $this->load->view('restrita/template/header', $data);
                     $this->load->view('restrita/usuarios/core');
                     $this->load->view('restrita/template/footer');
-
-                }                
+                }
             }
         }
     }
 
+    public function valida_email($email) {
+        $usuario_id = $this->input->post('usuario_id');
+
+        if (!$usuario_id) {
+            //Cadastrando.
+
+            if ($this->core_model->get_by_id('users', ['email' => $email])) {
+                $this->form_validation->set_message('valida_email', 'Esse e-mail já existe');
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            //Editando.
+
+            if ($this->core_model->get_by_id('users', ['email' => $email, 'id !=' => $usuario_id])) {
+                $this->form_validation->set_message('valida_email', 'Esse e-mail já existe');
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
+    public function valida_usuario($username) {
+        $usuario_id = $this->input->post('usuario_id');
+
+        if (!$usuario_id) {
+            //Cadastrando.
+
+            if ($this->core_model->get_by_id('users', ['username' => $username])) {
+                $this->form_validation->set_message('valida_usuario', 'Esse usuario já existe');
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            //Editando.
+
+            if ($this->core_model->get_by_id('users', ['username' => $username, 'id !=' => $usuario_id])) {
+                $this->form_validation->set_message('valida_usuario', 'Esse usuario já existe');
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
 }
