@@ -45,21 +45,24 @@ class Usuarios extends CI_Controller {
             $this->form_validation->set_rules('confirma', 'Confirma Senha', 'trim|required|matches[password]');
 
             if ($this->form_validation->run()) {
-                // echo "<pre>";
-                // print_r($this->input->post());
-                // exit();
 
                 $username = $this->input->post('username');
                 $password = $this->input->post('password');
                 $email = $this->input->post('email');
                 $additional_data = [
-                            'first_name' => $this->input->post('first_name'),
-                            'last_name' => $this->input->post('last_name'),
+                    'first_name' => $this->input->post('first_name'),
+                    'last_name' => $this->input->post('last_name'),
+                    'active'    => $this->input->post('active'),
                 ];
                 $group = [$this->input->post('perfil')]; // Sets user to admin.
-            
-                $this->ion_auth->register($username, $password, $email, $additional_data, $group);
 
+                if ($this->ion_auth->register($username, $password, $email, $additional_data, $group)) {
+                    $this->session->set_flashdata('sucesso', 'Dados salvos com sucesso!');
+                } else {
+                    $this->session->set_flashdata('erro', $this->ion_auth->errors());
+                }
+
+                redirect('restrita/usuarios');
             } else {
                 //Erro de validação.
 
@@ -71,10 +74,7 @@ class Usuarios extends CI_Controller {
                 $this->load->view('restrita/template/header', $data);
                 $this->load->view('restrita/usuarios/core');
                 $this->load->view('restrita/template/footer');
-
             }
-
-
         } else {
             if (!$usuario = $this->ion_auth->user($usuario_id)->row()) {
                 $this->session->set_flashdata('erro', 'O usuário não foi encontrado');
@@ -197,6 +197,31 @@ class Usuarios extends CI_Controller {
             } else {
                 return true;
             }
+        }
+    }
+
+    public function delete($usuario_id = NULL) {
+
+        $usuario_id = (int)$usuario_id;
+
+        if(!$usuario_id || !$this->ion_auth->user($usuario_id)->row()) {
+            $this->session->set_flashdata('erro', 'Usuário não encontrado!');
+            redirect('restrita/usuarios');
+        } else {
+
+            if($this->ion_auth->is_admin($usuario_id)) {
+                $this->session->set_flashdata('erro', 'Não é permitido excluir um usuário com perfil de Administrador!');
+                redirect('restrita/usuarios');
+            }
+
+            if($this->ion_auth->delete_user($usuario_id)) {
+                $this->session->set_flashdata('sucesso', 'Usuário excluído com sucesso!');
+            } else {
+                $this->session->set_flashdata('erro', $this->ion_auth->errors());
+            }
+
+            redirect('restrita/usuarios');
+
         }
     }
 }

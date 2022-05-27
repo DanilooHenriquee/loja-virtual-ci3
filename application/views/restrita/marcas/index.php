@@ -7,19 +7,12 @@
     <section class="section">
         <div class="section-body">
             <!-- add content here -->
-
-            <!-- <?php
-                    echo '<pre>';
-                    var_dump($usuarios);
-                    echo '</pre>';
-                    ?> -->
-
             <div class="row">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header d-block">
                             <h4><?= isset($titulo) ? $titulo : 'Loja Virtual'; ?></h4>
-                            <a href="<?= base_url('restrita/usuarios/core'); ?>" class="btn btn-primary float-right">Cadastrar</a>
+                            <a href="<?= base_url('restrita/marcas/core'); ?>" class="btn btn-primary float-right">Cadastrar</a>
                         </div>
                         <div class="card-body">
 
@@ -56,25 +49,25 @@
                                             <th class="text-center">
                                                 #
                                             </th>
-                                            <th>Nome Completo</th>
-                                            <th>E-mail</th>
-                                            <th>Perfil de Acesso</th>
-                                            <th>Status</th>
+                                            <th>Nome da Marca</th>
+                                            <th>Meta Link da Marca</th>
+                                            <th>Data de Cadastro</th>
+                                            <th>Ativa</th>
                                             <th class="nosort">Ação</th>
                                         </tr>
                                     </thead>
                                     <tbody>
 
-                                        <?php foreach ($usuarios as $usuario) : ?>
+                                        <?php foreach ($marcas as $marca) : ?>
                                             <tr>
-                                                <td><?= $usuario->id; ?></td>
-                                                <td><?= $usuario->first_name . ' ' . $usuario->last_name; ?></td>
-                                                <td><?= $usuario->email; ?></td>
-                                                <td><?= ($this->ion_auth->is_admin($usuario->id) ? 'Administrador' : 'Cliente'); ?></td>
-                                                <td><?= ($usuario->active == 1) ? '<span class="badge badge-success">Ativo</span>' : '<span class="badge badge-danger">Inativo</span>'; ?></td>
+                                                <td><?= $marca->marca_id; ?></td>
+                                                <td><?= $marca->marca_nome; ?></td>
+                                                <td> <i class="fas fa-external-link-alt text-info"></i> &nbsp; <?= $marca->marca_meta_link; ?></td>
+                                                <td><?= formata_data_banco_com_hora($marca->marca_data_criacao); ?></td>
+                                                <td><?= ($marca->marca_ativa == 1) ? '<span class="badge badge-success">Ativo</span>' : '<span class="badge badge-danger">Inativo</span>'; ?></td>
                                                 <td>
-                                                    <a href="<?= base_url('restrita/usuarios/core/' . $usuario->id); ?>" class="btn btn-icon btn-primary" title="Editar"><i class="far fa-edit"></i></a>
-                                                    <a href="<?= base_url('restrita/usuarios/delete/' . $usuario->id); ?>" class="btn btn-icon btn-danger delete" data-confirme="Tem certeza da Exclusão ?" title="Excluir"><i class="fas fa-times"></i></a>
+                                                    <a href="<?= base_url('restrita/marcas/core/' . $marca->marca_id); ?>" class="btn btn-icon btn-primary" title="Editar"><i class="far fa-edit"></i></a>
+                                                    <a href="<?= base_url('restrita/marcas/delete/' . $marca->marca_id); ?>" class="btn btn-icon btn-danger delete" data-confirme="Tem certeza da Exclusão da Marca?" title="Excluir"><i class="fas fa-times"></i></a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>

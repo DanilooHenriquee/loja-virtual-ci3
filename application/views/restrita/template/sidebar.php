@@ -11,16 +11,19 @@
         <a href="<?= base_url('restrita'); ?>" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
       </li>
 
-      <li class="dropdown">
-        <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="briefcase"></i><span>Widgets</span></a>
-        <ul class="dropdown-menu">
-          <li><a class="nav-link" href="widget-chart.html">Chart Widgets</a></li>
-          <li><a class="nav-link" href="widget-data.html">Data Widgets</a></li>
-        </ul>
-      </li>
-
       <li class="dropdown <?= $this->router->fetch_class() == 'usuarios' && $this->router->fetch_method() == 'index' ? 'active' : ''; ?>">
         <a href="<?= base_url('restrita/usuarios'); ?>" class="nav-link"><i class="fas fa-users"></i><span>Usuários</span></a>
+      </li>
+
+      <li class="dropdown <?= $this->router->fetch_class() == 'marcas' && $this->router->fetch_method() == 'index' ? 'active' : ''; ?>">
+        <a href="<?= base_url('restrita/marcas'); ?>" class="nav-link"><i class="fas fa-layer-group"></i><span>Marcas</span></a>
+      </li>
+
+      <li class="dropdown">
+        <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="settings"></i><span>Configurações</span></a>
+        <ul class="dropdown-menu">
+          <li><a class="nav-link" href="<?= base_url('restrita/sistema'); ?>">Sistema</a></li>
+        </ul>
       </li>
 
     </ul>
