@@ -143,7 +143,7 @@ class Marcas extends CI_Controller {
         }
 
         if($this->core_model->get_by_id('marcas', ['marca_id' => $marca_id, 'marca_ativa' => 1])) {
-            $this->session->set_flashdata('erro', 'Não é possivel excluir uma Marca Ativa!');
+            $this->session->set_flashdata('erro', 'Não é permitido excluir uma Marca Ativa!');
             redirect('restrita/marcas');
         }
         

@@ -20,7 +20,17 @@
       </li>
 
       <li class="dropdown">
-        <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="settings"></i><span>Configurações</span></a>
+        <a href="#" class="menu-toggle nav-link has-dropdown"><i class="fas fa-box-open"></i><span>Categorias</span></a>
+        <ul class="dropdown-menu">
+          <li><a class="nav-link" href="<?= base_url('restrita/master'); ?>">Categorias Pai</a></li>
+        </ul>
+        <ul class="dropdown-menu">
+          <li><a class="nav-link" href="<?= base_url('restrita/sistema'); ?>">Categorias Filhas</a></li>
+        </ul>
+      </li>
+
+      <li class="dropdown">
+        <a href="#" class="menu-toggle nav-link has-dropdown"><i class="fas fa-cog"></i><span>Configurações</span></a>
         <ul class="dropdown-menu">
           <li><a class="nav-link" href="<?= base_url('restrita/sistema'); ?>">Sistema</a></li>
         </ul>
